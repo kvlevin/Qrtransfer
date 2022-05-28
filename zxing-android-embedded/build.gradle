@@ -1,0 +1,24 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.0.3'
+    }
+}
+
+subprojects {
+    repositories {
+        google()
+        mavenLocal()
+        mavenCentral()
+    }
+
+    version = '4.3.0'
+    group = 'com.journeyapps'
+
+    ext.androidTargetSdk = 30
+    ext.zxingCore = 'com.google.zxing:core:3.4.1'
+}

@@ -1,0 +1,1 @@
+# qrcode-generator-pyqt5

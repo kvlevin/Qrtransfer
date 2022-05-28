@@ -1,0 +1,89 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion project.androidTargetSdk
+
+    defaultConfig {
+        multiDexEnabled true
+        minSdkVersion 19
+        targetSdkVersion project.androidTargetSdk
+        versionCode 411
+        versionName "4.1.1"
+    }
+
+    def validConfig
+    def keystoreFile
+    def keystorePassword
+    def keystoreAlias
+
+    try {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        keystoreFile = properties.getProperty('keystore.file')
+        keystorePassword = properties.getProperty('keystore.password')
+        keystoreAlias = properties.getProperty('keystore.alias')
+        validConfig = keystoreFile != null && keystorePassword != null && keystoreAlias != null
+    } catch (error) {
+        validConfig = false
+    }
+
+    if (validConfig) {
+        System.out.println("Release signing configured with " + keystoreFile)
+        signingConfigs {
+            release {
+                storeFile project.rootProject.file(keystoreFile)
+                storePassword keystorePassword
+                keyAlias keystoreAlias
+                keyPassword keystorePassword
+            }
+        }
+    } else {
+        System.out.println("Specify keystore.file, keystore.alias and keystore.password in local.properties to enable release signing.")
+    }
+
+    buildTypes {
+        release {
+            if (validConfig) {
+                signingConfig signingConfigs.release
+            }
+
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        // Error: The lint detector
+        //    androidx.appcompat.view.OnClickXmlDetector
+        // called context.getMainProject() during module analysis.
+        disable 'UsingOnClickInXml'
+    }
+}
+
+
+dependencies {
+    // If you use this from an external project, use the following instead:
+    //   implementation 'com.journeyapps:zxing-android-embedded:<version>'
+    implementation project(':zxing-android-embedded')
+
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.legacy:legacy-support-v13:1.0.0'
+    implementation "androidx.activity:activity:1.3.1"
+
+    // Desugaring and multidex is required for API < 21.
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    implementation 'androidx.multidex:multidex:2.0.1'
+
+    // leakcanary is for development purposes only
+    // https://github.com/square/leakcanary
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+
+    // AboutLibraries
+    implementation 'com.mikepenz:aboutlibraries:6.2.3'
+}
